@@ -1,6 +1,7 @@
 import {
   ForbiddenException,
   Injectable,
+  Inject,
   NotFoundException,
 } from "@nestjs/common";
 import { randomBytes, createHash } from "node:crypto";
@@ -14,7 +15,7 @@ const digest = (value: string) =>
 
 @Injectable()
 export class WorkspaceService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(@Inject(DatabaseService) private readonly db: DatabaseService) {}
 
   async create(userId: string, dto: CreateWorkspaceDto) {
     return this.db.transaction(async (client) => {

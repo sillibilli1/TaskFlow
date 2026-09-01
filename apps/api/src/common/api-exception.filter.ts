@@ -16,6 +16,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
+    if (!(exception instanceof HttpException))
+      console.error("Unhandled API exception", exception);
     const raw =
       exception instanceof HttpException ? exception.getResponse() : undefined;
     const message =

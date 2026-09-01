@@ -3,7 +3,13 @@ import { Pool, PoolClient, QueryResultRow } from "pg";
 
 @Injectable()
 export class DatabaseService implements OnModuleDestroy {
-  readonly pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  readonly pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl:
+      process.env.DATABASE_SSL === "true"
+        ? { rejectUnauthorized: false }
+        : undefined,
+  });
   query<T extends QueryResultRow = QueryResultRow>(
     text: string,
     values?: unknown[],

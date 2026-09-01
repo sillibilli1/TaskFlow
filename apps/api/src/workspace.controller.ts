@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Inject,
   Param,
   Post,
   Query,
@@ -15,12 +16,14 @@ import {
   Roles,
   WorkspaceGuard,
 } from "./guards";
-import { CreateWorkspaceDto, InviteDto } from "./dtos";
+import { CreateWorkspaceDto, InviteDto, TokenDto } from "./dtos";
 import { WorkspaceService } from "./workspace.service";
 
 @Controller("workspaces")
 export class WorkspaceController {
-  constructor(private readonly workspaces: WorkspaceService) {}
+  constructor(
+    @Inject(WorkspaceService) private readonly workspaces: WorkspaceService,
+  ) {}
   @Post() @UseGuards(AuthGuard) create(
     @Req() req: AuthRequest,
     @Body() dto: CreateWorkspaceDto,
@@ -46,8 +49,8 @@ export class WorkspaceController {
   }
   @Post("invitations/accept") @UseGuards(AuthGuard) accept(
     @Req() req: AuthRequest,
-    @Body("token") token: string,
+    @Body() dto: TokenDto,
   ) {
-    return this.workspaces.accept(token, req.user!.id);
+    return this.workspaces.accept(dto.token, req.user!.id);
   }
 }

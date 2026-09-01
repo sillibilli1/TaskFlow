@@ -1,6 +1,9 @@
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { resolve } from "node:path";
+import dotenv from "dotenv";
+dotenv.config({ path: resolve(process.cwd(), "../../.env") });
 import cookieParser from "cookie-parser";
 import { ApiExceptionFilter } from "./common/api-exception.filter";
 import { AppModule } from "./app.module";

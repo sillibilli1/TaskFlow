@@ -6,9 +6,16 @@ export async function sendLocalEmail(
   token: string,
 ) {
   const transport = nodemailer.createTransport({
-    host: process.env.SMTP_HOST ?? "localhost",
-    port: Number(process.env.SMTP_PORT ?? 1025),
-    secure: false,
+    host: process.env.SMTP_HOST ?? "sandbox.smtp.mailtrap.io",
+    port: Number(process.env.SMTP_PORT ?? 2525),
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASSWORD,
+    },
+    secure: process.env.SMTP_SECURE === "true",
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 10_000,
   });
   const baseUrl = process.env.APP_URL ?? "http://localhost:5173";
   const path =
@@ -31,7 +38,7 @@ export async function sendLocalEmail(
     });
   } catch (error) {
     console.warn(
-      `[email:${kind}] delivery failed; local token is available in Mailpit configuration`,
+      `[email:${kind}] delivery failed; check Mailtrap credentials and sandbox inbox`,
       error instanceof Error ? error.message : error,
     );
   }

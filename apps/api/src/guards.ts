@@ -2,6 +2,7 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
+  Inject,
   Injectable,
   SetMetadata,
   UnauthorizedException,
@@ -19,7 +20,7 @@ export const Roles = (...roles: Role[]) => SetMetadata("roles", roles);
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private readonly auth: AuthService) {}
+  constructor(@Inject(AuthService) private readonly auth: AuthService) {}
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<AuthRequest>();
     const token = req.cookies?.access_token;
@@ -31,7 +32,7 @@ export class AuthGuard implements CanActivate {
 
 @Injectable()
 export class WorkspaceGuard implements CanActivate {
-  constructor(private readonly auth: AuthService) {}
+  constructor(@Inject(AuthService) private readonly auth: AuthService) {}
   async canActivate(context: ExecutionContext) {
     const req = context.switchToHttp().getRequest<AuthRequest>();
     const workspaceParam = req.params.workspaceId;
@@ -49,7 +50,7 @@ export class WorkspaceGuard implements CanActivate {
 
 @Injectable()
 export class RoleGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector) {}
+  constructor(@Inject(Reflector) private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext) {
     const required = this.reflector.getAllAndOverride<Role[]>("roles", [
       context.getHandler(),

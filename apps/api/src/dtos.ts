@@ -21,7 +21,9 @@ export class ResetPasswordDto {
   @IsString() @MinLength(8) password!: string;
 }
 export class TokenDto {
-  @IsString() token!: string;
+  @IsString()
+  @MinLength(1)
+  token!: string;
 }
 export class CreateWorkspaceDto {
   @IsString() @MinLength(2) name!: string;

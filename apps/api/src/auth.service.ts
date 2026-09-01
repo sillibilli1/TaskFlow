@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   BadRequestException,
+  Inject,
 } from "@nestjs/common";
 import * as argon2 from "argon2";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
@@ -23,7 +24,7 @@ const tokenCookie = {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly db: DatabaseService) {}
+  constructor(@Inject(DatabaseService) private readonly db: DatabaseService) {}
   async register(email: string, password: string) {
     const normalized = email.trim().toLowerCase();
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
@@ -46,18 +47,31 @@ export class AuthService {
       id: string;
       email: string;
       password_hash: string;
-    }>("SELECT id,email,password_hash FROM users WHERE email=$1", [
-      email.trim().toLowerCase(),
-    ]);
+      email_verified_at: Date | null;
+      session_version: number;
+    }>(
+      "SELECT id,email,password_hash,email_verified_at,session_version FROM users WHERE email=$1",
+      [email.trim().toLowerCase()],
+    );
     const user = result.rows[0];
     if (!user || !(await argon2.verify(user.password_hash, password)))
       throw new UnauthorizedException("Invalid email or password");
-    return { id: user.id, email: user.email };
+    if (!user.email_verified_at)
+      throw new UnauthorizedException("Email verification is required");
+    return {
+      id: user.id,
+      email: user.email,
+      sessionVersion: user.session_version,
+    };
   }
-  signAccess(user: { id: string; email: string }) {
-    return jwt.sign({ sub: user.id, email: user.email }, secret(), {
-      expiresIn: "15m",
-    });
+  signAccess(user: { id: string; email: string }, sessionVersion = 0) {
+    return jwt.sign(
+      { sub: user.id, email: user.email, sessionVersion },
+      secret(),
+      {
+        expiresIn: "15m",
+      },
+    );
   }
   async issueRefresh(userId: string, familyId: string = randomUUID()) {
     const raw = randomBytes(48).toString("base64url");
@@ -67,41 +81,84 @@ export class AuthService {
     );
     return { raw, id: result.rows[0].id, familyId };
   }
-  verifyAccessToken(token: string) {
+  async verifyAccessToken(token: string) {
     try {
       const payload = jwt.verify(token, secret()) as jwt.JwtPayload;
       if (!payload.sub || typeof payload.email !== "string") throw new Error();
-      return { id: String(payload.sub), email: payload.email };
+      const user = await this.db.query<{ session_version: number }>(
+        "SELECT session_version FROM users WHERE id=$1",
+        [String(payload.sub)],
+      );
+      if (
+        !user.rows[0] ||
+        Number(payload.sessionVersion ?? 0) !== user.rows[0].session_version
+      )
+        throw new Error();
+      return {
+        id: String(payload.sub),
+        email: payload.email,
+        sessionVersion: user.rows[0].session_version,
+      };
     } catch {
       throw new UnauthorizedException("Invalid or expired session");
     }
   }
   async rotateRefresh(raw: string) {
-    const result = await this.db.query<{
-      id: string;
-      user_id: string;
-      family_id: string;
-      expires_at: Date;
-      revoked_at: Date | null;
-    }>(
-      "SELECT id,user_id,family_id,expires_at,revoked_at FROM refresh_tokens WHERE token_hash=$1",
-      [hashToken(raw)],
-    );
-    const token = result.rows[0];
-    if (!token || token.revoked_at || new Date(token.expires_at) < new Date())
-      throw new UnauthorizedException("Invalid refresh token");
-    const next = await this.issueRefresh(token.user_id, token.family_id);
-    await this.db.query(
-      "UPDATE refresh_tokens SET revoked_at=now(), replaced_by=$1 WHERE id=$2",
-      [next.id, token.id],
-    );
-    const user = (
-      await this.db.query<{ id: string; email: string }>(
-        "SELECT id,email FROM users WHERE id=$1",
-        [token.user_id],
-      )
-    ).rows[0];
-    return { user, ...next };
+    return this.db.transaction(async (client) => {
+      const result = await client.query<{
+        id: string;
+        user_id: string;
+        family_id: string;
+        expires_at: Date;
+        revoked_at: Date | null;
+      }>(
+        "SELECT id,user_id,family_id,expires_at,revoked_at FROM refresh_tokens WHERE token_hash=$1 FOR UPDATE",
+        [hashToken(raw)],
+      );
+      const token = result.rows[0];
+      if (
+        !token ||
+        token.revoked_at ||
+        new Date(token.expires_at) < new Date()
+      ) {
+        if (token?.family_id)
+          await client.query(
+            "UPDATE refresh_tokens SET revoked_at=COALESCE(revoked_at, now()) WHERE family_id=$1",
+            [token.family_id],
+          );
+        throw new UnauthorizedException("Invalid refresh token");
+      }
+      const nextRaw = randomBytes(48).toString("base64url");
+      const next = (
+        await client.query<{ id: string }>(
+          "INSERT INTO refresh_tokens (user_id,token_hash,family_id,expires_at) VALUES ($1,$2,$3,now()+interval '30 days') RETURNING id",
+          [token.user_id, hashToken(nextRaw), token.family_id],
+        )
+      ).rows[0];
+      await client.query(
+        "UPDATE refresh_tokens SET revoked_at=now(), replaced_by=$1 WHERE id=$2 AND revoked_at IS NULL",
+        [next.id, token.id],
+      );
+      const user = (
+        await client.query<{
+          id: string;
+          email: string;
+          session_version: number;
+        }>("SELECT id,email,session_version FROM users WHERE id=$1", [
+          token.user_id,
+        ])
+      ).rows[0];
+      return {
+        user: {
+          id: user.id,
+          email: user.email,
+          sessionVersion: user.session_version,
+        },
+        raw: nextRaw,
+        id: next.id,
+        familyId: token.family_id,
+      };
+    });
   }
   async logout(raw?: string) {
     if (raw)
@@ -132,7 +189,7 @@ export class AuthService {
   async resetPassword(raw: string, password: string) {
     const hash = await argon2.hash(password, { type: argon2.argon2id });
     const result = await this.db.query<{ id: string }>(
-      "UPDATE users SET password_hash=$1,password_reset_token_hash=NULL,password_reset_expires_at=NULL WHERE password_reset_token_hash=$2 AND password_reset_expires_at>now() RETURNING id",
+      "UPDATE users SET password_hash=$1,password_reset_token_hash=NULL,password_reset_expires_at=NULL,session_version=session_version+1 WHERE password_reset_token_hash=$2 AND password_reset_expires_at>now() RETURNING id",
       [hash, hashToken(raw)],
     );
     if (!result.rowCount)
