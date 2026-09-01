@@ -1,0 +1,5 @@
+01-cloud-native-saas-platform.md
+.env.example
+node_modules
+dist
+coverage

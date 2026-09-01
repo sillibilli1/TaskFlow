@@ -1,0 +1,29 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run build
+      - name: Validate Docker Compose configuration
+        run: docker compose config --quiet
+      - name: Build API image
+        run: docker build -f apps/api/Dockerfile -t cloud-saas-api:ci .
+      - name: Build web image
+        run: docker build -f apps/web/Dockerfile -t cloud-saas-web:ci .
+      - name: Build worker image
+        run: docker build -f apps/worker/Dockerfile -t cloud-saas-worker:ci .
