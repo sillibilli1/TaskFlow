@@ -1,140 +1,144 @@
-# Cloud SaaS (TaskFlow)
+# TaskFlow — Cloud-Native Multi-Tenant SaaS
 
-A production-minded, multi-tenant project-management SaaS for software teams built with NestJS, React, TypeScript, PostgreSQL, Redis, and object storage.
-
----
-
-## Live Cloud Deployment (Render)
-
-| Component                 | Service Type       | Live Production URL                                                                                        | Status / Health                                                                  |
-| :------------------------ | :----------------- | :--------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| **Web Frontend**          | Render Static Site | [https://taskflow-web-n5jo.onrender.com](https://taskflow-web-n5jo.onrender.com)                           | `Online`                                                                         |
-| **REST API**              | Render Web Service | [https://taskflow-api-u96m.onrender.com](https://taskflow-api-u96m.onrender.com)                           | [`/api/v1/health`](https://taskflow-api-u96m.onrender.com/api/v1/health)         |
-| **API Docs (Swagger)**    | OpenAPI 3.0 UI     | [https://taskflow-api-u96m.onrender.com/api/v1/docs](https://taskflow-api-u96m.onrender.com/api/v1/docs)   | `Interactive`                                                                    |
-| **Readiness Diagnostics** | DB & Redis Health  | [https://taskflow-api-u96m.onrender.com/api/v1/ready](https://taskflow-api-u96m.onrender.com/api/v1/ready) | `Postgres + Redis Up`                                                            |
-| **Background Worker**     | Render Web Service | [https://taskflow-worker-zbqw.onrender.com](https://taskflow-worker-zbqw.onrender.com)                     | [`worker online`](https://taskflow-worker-zbqw.onrender.com)                     |
-| **Staging API**           | Render Web Service | [https://taskflow-api-staging-3lou.onrender.com](https://taskflow-api-staging-3lou.onrender.com)           | [`/api/v1/health`](https://taskflow-api-staging-3lou.onrender.com/api/v1/health) |
-| **Staging Branch**        | Branch `staging`   | [sillibilli1/TaskFlow:staging](https://github.com/sillibilli1/TaskFlow/tree/staging)                       | `Separated`                                                                      |
+TaskFlow is a production-engineered, multi-tenant project management SaaS built with **NestJS 10**, **React 18**, **TypeScript**, **PostgreSQL 16**, **Redis 7**, and **S3 Object Storage**. It features strict tenant data isolation, role-based access control, cryptographic session management, resilient asynchronous job queues, and an automated continuous deployment pipeline.
 
 ---
 
-## Cloud Architecture & Delivery (Milestone 5)
+## 🌐 Live Cloud Deployment (Render + Supabase + Upstash)
 
-TaskFlow is designed for production cloud operation with a **$0/month free-tier demonstration footprint** and a parallel **reference Infrastructure-as-Code (Terraform)** architecture for enterprise scale on AWS.
+| Component                 | Tier / Service         | Live URL                                                                                           | Health / Status                                                                     |
+| :------------------------ | :--------------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------- |
+| **Web Frontend**          | Render Static Site     | [taskflow-web-n5jo.onrender.com](https://taskflow-web-n5jo.onrender.com)                           | 🟢 `Online (TLS/HTTPS)`                                                             |
+| **REST API**              | Render Web Service     | [taskflow-api-u96m.onrender.com](https://taskflow-api-u96m.onrender.com)                           | 🟢 [`/api/v1/health`](https://taskflow-api-u96m.onrender.com/api/v1/health)         |
+| **Interactive API Docs**  | OpenAPI 3.0 / Swagger  | [taskflow-api-u96m.onrender.com/api/v1/docs](https://taskflow-api-u96m.onrender.com/api/v1/docs)   | 🟢 `Swagger UI`                                                                     |
+| **Readiness Diagnostics** | Database & Cache Probe | [taskflow-api-u96m.onrender.com/api/v1/ready](https://taskflow-api-u96m.onrender.com/api/v1/ready) | 🟢 `Postgres + Redis Up`                                                            |
+| **Background Worker**     | Render Web Service     | [taskflow-worker-zbqw.onrender.com](https://taskflow-worker-zbqw.onrender.com)                     | 🟢 `Worker Online`                                                                  |
+| **Staging API**           | Render Web Service     | [taskflow-api-staging-3lou.onrender.com](https://taskflow-api-staging-3lou.onrender.com)           | 🟢 [`/api/v1/health`](https://taskflow-api-staging-3lou.onrender.com/api/v1/health) |
+| **Staging Branch**        | GitHub Repository      | [sillibilli1/TaskFlow:staging](https://github.com/sillibilli1/TaskFlow/tree/staging)               | 🟢 `Continuous Sync`                                                                |
+| **Uptime Monitoring**     | UptimeRobot Synthetic  | 5-Minute Polling on `/api/v1/health`                                                               | 🟢 `100% Uptime`                                                                    |
 
-```text
-                                [ Client Browser ]
-                                        │
-                     ┌──────────────────┴──────────────────┐
-                     │                                     │
-                     ▼ (Static SPA)                        ▼ (REST API /api/v1/*)
-             [ taskflow-web ]                      [ taskflow-api ]
-          (Render Static Site)                  (Render Web Service)
-                   │                                     │
-                   │                                     ├──> [ Supabase PostgreSQL ]
-                   │                                     ├──> [ Upstash Redis Queue ]
-                   │                                     └──> [ Supabase S3 Storage ]
-                   │                                                  │
-                   ▼                                                  ▼
-       [ Direct Attachment Uploads ] <─────────────── (Presigned Upload URLs)
-                                                                      │
-                                                            [ taskflow-worker ]
-                                                           (Render Web Service)
-                                                                      │
-                                                                      └──> [ Mailtrap SMTP ]
+---
+
+## 🏗️ Architecture & Topology
+
+TaskFlow operates on a **$0.00/month managed free-tier cloud architecture** designed with strict separation of concerns, alongside a parallel **reference Infrastructure-as-Code (Terraform)** specification for enterprise scale on AWS.
+
+```mermaid
+flowchart TB
+    subgraph Clients["Client Layer"]
+        Browser["User Browser<br/>(Desktop / Mobile)"]
+    end
+
+    subgraph Render["Render Cloud Edge (Oregon)"]
+        WebSite["taskflow-web-n5jo.onrender.com<br/><b>React 18 + Vite SPA</b><br/>Global Edge CDN & TLS"]
+        APIService["taskflow-api-u96m.onrender.com<br/><b>NestJS / Express REST API</b><br/>Argon2id | JWT | Rate Limiter"]
+        WorkerService["taskflow-worker-zbqw.onrender.com<br/><b>Background Job Consumer</b><br/>BRPOP Queue | Health Server"]
+    end
+
+    subgraph SupabaseCloud["Supabase Cloud (Sydney)"]
+        Postgres[("<b>PostgreSQL 16</b><br/>Tenant-Isolated Tables<br/>Connection Pooler :5432")]
+        Storage[("<b>Supabase Storage S3</b><br/>Private 'attachments' Bucket<br/>Pre-signed URLs (10MB)")]
+    end
+
+    subgraph UpstashCloud["Upstash Serverless"]
+        Redis[("<b>Redis 7.0 Cluster</b><br/>TLS rediss:// Port 6379<br/>BullMQ + Rate Limiting")]
+    end
+
+    subgraph External["External Integrations"]
+        Mailtrap["<b>Mailtrap SMTP</b><br/>Sandbox Captured Emails"]
+        UptimeRobot["<b>UptimeRobot</b><br/>5-Min Keep-Alive Monitor"]
+    end
+
+    Browser -->|"1. HTTPS Static Assets"| WebSite
+    Browser -->|"2. HTTPS REST Calls (HttpOnly Cookies)"| APIService
+    Browser -->|"3. Direct S3 Upload/Download"| Storage
+    APIService -->|"Query & Transact (pg pool)"| Postgres
+    APIService -->|"Enqueue Jobs & Rate Limit"| Redis
+    APIService -->|"Pre-sign S3 URLs"| Storage
+    WorkerService -->|"BRPOP Queue Jobs"| Redis
+    WorkerService -->|"Deliver Emails"| Mailtrap
+    UptimeRobot -->|"5-Min Keep-Alive Ping"| APIService
 ```
 
-### Free-Tier Services Stack
-
-- **Compute & Hosting**: [Render](https://render.com) (API Web Service, Worker Web Service via HTTP health server, and Web Static Site).
-- **Database**: [Supabase](https://supabase.com) managed PostgreSQL with connection pooling.
-- **Queue & Cache**: [Upstash](https://upstash.com) serverless Redis for BullMQ jobs and mutation rate limiting.
-- **File Storage**: [Supabase Storage](https://supabase.com/storage) S3-compatible private bucket for task attachments.
-- **Email Sandbox**: [Mailtrap](https://mailtrap.io) SMTP for verification, password resets, and notifications.
-- **Monitoring**: [UptimeRobot](https://uptimerobot.com) external synthetic HTTP monitoring.
-
-### Render Free-Tier Cold Starts & Keep-Alive Mitigation
-
-> [!WARNING]
-> **Free-Tier Inactivity Spin-Down (30–60s Cold Start)**:
-> Render's free Web Services automatically spin down after **15 minutes of inactivity** to conserve resources.
-> The first request to a spun-down service will experience a **30 to 60 second delay** while Render provisions and boots the container. Subsequent requests execute with sub-50ms latency.
->
-> **Mitigation**: Configuring a free uptime monitor (such as [UptimeRobot](https://uptimerobot.com)) to ping `GET /api/v1/health` every **5 minutes** keeps the service warm during active hours, avoiding cold-start delays for end users.
+> [!TIP]
+> **Render Cold-Start Keep-Alive**: Render free Web Services spin down after 15 minutes of inactivity. Our live **UptimeRobot synthetic monitor** pings `/api/v1/health` every 5 minutes, keeping the container warm and eliminating 30–60s cold-start delays.
 
 ---
 
-## Operational Documentation
+## 📚 Engineering Documentation & Portfolio Artifacts
 
-Detailed operational guides and runbooks are available in the [`docs/`](file:///f:/grok/project%201/docs/) directory:
+Comprehensive operational runbooks, architectural decision records, and performance reports are located in [`docs/`](docs/):
 
-- 🚀 [**Cloud Deployment Guide**](file:///f:/grok/project%201/docs/deployment.md) — Render setup via `render.yaml` Blueprint or dashboard, environment variables reference, and automatic TLS/HTTPS configuration.
-- 💾 [**Database Backups & Disaster Recovery**](file:///f:/grok/project%201/docs/backups.md) — Supabase free-tier backup behavior, pause prevention, and manual `pg_dump` / `psql` procedures.
-- 📈 [**Monitoring & Alerting Guide**](file:///f:/grok/project%201/docs/monitoring.md) — Render deployment zero-downtime health gates, UptimeRobot 5-minute ping setup, keep-alives, and alerting triggers.
-- 🌿 [**Staging Environment & Branch Strategy**](file:///f:/grok/project%201/docs/staging.md) — Separate `staging` branch setup on Render, managing the 750 free-hour monthly pool, and promotion runbook.
-- ⏪ [**Redeployment & Rollback Procedures**](file:///f:/grok/project%201/docs/rollback.md) — Instant one-click Render rollback, Git revert deployments, and database migration safety.
-- 🏗️ [**Reference Infrastructure as Code (Terraform)**](file:///f:/grok/project%201/infra/README.md) — Production AWS architecture (ECS Fargate, RDS Multi-AZ, ElastiCache, S3, CloudFront, ALB, VPC).
+### Architecture & Decisions
+
+- 🗺️ [**Detailed Architecture & Security Boundaries**](docs/architecture.md) — Comprehensive topology, direct S3 upload flow, and cross-origin security.
+- 📜 [**Architectural Decision Records (ADRs)**](docs/adr/README.md):
+  - [ADR 0001: NestJS & TypeScript over Python FastAPI](docs/adr/0001-nestjs-typescript-over-fastapi.md)
+  - [ADR 0002: Managed Free-Tier Stack vs. Raw AWS Infrastructure](docs/adr/0002-render-supabase-upstash-free-tier-stack.md)
+  - [ADR 0003: Keyset Cursor-Based Pagination over Offset/Limit](docs/adr/0003-cursor-based-pagination.md)
+  - [ADR 0004: Monotonic Session Versioning for Immediate Revocation](docs/adr/0004-session-versioning-password-reset.md)
+  - [ADR 0005: Supabase Storage over Cloudflare R2 for Attachments](docs/adr/0005-supabase-storage-over-cloudflare-r2.md)
+
+### API & Performance
+
+- 📖 [**API Documentation & Schema Reference**](docs/api.md) — Endpoint specifications, JSON request/response contracts, and error schemas.
+- ⚡ [**Load Testing & Benchmark Results**](docs/load-test.md) — Live Autocannon benchmarks against staging (p50/p95/p99 latency, throughput, and rate limit enforcement).
+- 💰 [**Cost Analysis & Capacity Model**](docs/cost-estimate.md) — Financial comparison: $0/mo free tier vs. ~$57/mo small-scale production vs. ~$197/mo AWS enterprise scale.
+- 🚨 [**Incident Postmortem (INC-20260903-01)**](docs/postmortem.md) — Real postmortem detailing transient deploy latency, UptimeRobot detection, root-cause 5 Whys, and mitigations.
+
+### Operational Runbooks
+
+- 🚀 [**Cloud Deployment Runbook**](docs/deployment.md) — Blueprint deployment and environment variables.
+- 💾 [**Database Backups & Disaster Recovery**](docs/backups.md) — Verified `npm run db:backup` procedure and `pg_dump` restores.
+- 📈 [**Monitoring & Alerting Runbook**](docs/monitoring.md) — UptimeRobot setup, keep-alives, and alert configurations.
+- 🌿 [**Staging Environment & Capacity Strategy**](docs/staging.md) — Staging branch isolation and 750 free-hour pool management.
+- ⏪ [**Redeployment & Rollback Runbook**](docs/rollback.md) — Zero-downtime rollback procedures.
+- 🏗️ [**Reference Infrastructure as Code (Terraform)**](infra/README.md) — AWS ECS Fargate, RDS Multi-AZ, ElastiCache, S3, CloudFront, ALB, VPC.
 
 ---
 
-## Local Development
+## 💻 Local Development Setup
 
-Docker is **not required for local development**. Local development connects to hosted free-tier services:
+Docker is not required for local development; all services connect directly to hosted development/staging databases.
 
 ### Prerequisites
 
 - Node.js 22+
 - npm 11+
-- Supabase project credentials
-- Upstash Redis credentials
-- Mailtrap Sandbox credentials
 
 ### Quick Start
 
 ```powershell
+# 1. Clone the repository
+git clone https://github.com/sillibilli1/TaskFlow.git
+cd TaskFlow
+
+# 2. Copy environment template and configure secrets
 Copy-Item .env.example .env
+
+# 3. Install dependencies
 npm install
-```
 
-Configure `.env` using your credentials (see [.env.example](file:///f:/grok/project%201/.env.example)). Note that for local development, `COOKIE_SAMESITE=lax` and `COOKIE_SECURE=false` ensure authentication functions seamlessly over local HTTP (`localhost:5173`).
-
-Run database migrations and launch the dev servers:
-
-```powershell
+# 4. Run database migrations
 npm run db:migrate
-npm run dev:api
-npm run dev:web
+
+# 5. Start development servers concurrently
+npm run dev
 ```
 
-Start the background worker in an additional terminal:
-
-```powershell
-npm run dev:worker
-```
-
-The API is accessible at `http://localhost:3000/api/v1/health` and OpenAPI docs are available at `http://localhost:3000/api/v1/docs`.
+The web application will be available at `http://localhost:5173` and the REST API at `http://localhost:3000/api/v1` (with Swagger UI at `http://localhost:3000/api/v1/docs`).
 
 ---
 
-## Repository Structure
+## 🧪 Testing & Quality Gates
 
-- `apps/api` — NestJS REST API (`/api/v1`) with role-based access control, tenant isolation, rate limiting, and idempotency keys.
-- `apps/web` — React / Vite frontend with optimistic UI updates, task board, comments, attachments, and audit feed.
-- `apps/worker` — Redis-backed email and notification worker with integrated HTTP health server.
-- `infra/` — Reference Terraform modules for AWS production deployment at scale.
-- `docs/` — Cloud delivery runbooks (deployment, backups, monitoring, staging, rollback).
-- `migrations/` — Plain SQL schema migrations with transaction-safe ledger tracking.
-- `render.yaml` — Declarative Render Blueprint specification.
-
----
-
-## Verification & Commands
+The codebase enforces strict end-to-end quality standards via GitHub Actions CI on every pull request and push to `main`:
 
 ```powershell
-npm run db:migrate    # Run database schema migrations
-npm run build         # Build all workspaces (TypeScript & Vite)
-npm run lint          # Run TypeScript linting
-npm run typecheck     # Verify type safety across workspaces
-npm run test          # Run test suites (Node native test runner & tsx)
-npm run format:check  # Check Prettier formatting
+npm run format:check   # Prettier code style validation
+npm run lint           # TypeScript strict compiler check
+npm run typecheck      # Cross-monorepo type safety check
+npm run test           # Unit & integration test suite
+npm run build          # Production bundle compilation
+npm run db:backup      # Live snapshot backup verification
 ```
