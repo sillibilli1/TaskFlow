@@ -18,7 +18,38 @@ This guide details the database backup policies, constraints, and manual backup/
 
 ---
 
-## 2. Manual Backup Procedure (`pg_dump`)
+## 2. Automated & Verified Backup Command (`npm run db:backup`)
+
+The repository includes a pre-configured, dependency-free backup script [`scripts/backup.mjs`](file:///f:/grok/project%201/scripts/backup.mjs) that connects directly to Supabase using your `.env` credentials. It runs on Windows, macOS, and Linux without requiring PostgreSQL client binaries (`pg_dump`) installed locally:
+
+```powershell
+npm run db:backup
+```
+
+### Verified Live Output:
+
+```text
+Connecting to Supabase PostgreSQL database...
+✓ Backed up table schema_migrations (5 rows)
+✓ Backed up table users (35 rows)
+✓ Backed up table workspaces (12 rows)
+✓ Backed up table workspace_members (23 rows)
+✓ Backed up table projects (12 rows)
+✓ Backed up table tasks (8 rows)
+✓ Backed up table comments (5 rows)
+✓ Backed up table attachments (4 rows)
+✓ Backed up table activity_events (43 rows)
+✓ Backed up table refresh_tokens (51 rows)
+
+Backup successfully written to:
+backups/backup_2026-09-02T22-42-38-331Z.json
+```
+
+All 10 tables are extracted, structured, and saved with ISO timestamps in the git-ignored `backups/` directory.
+
+---
+
+## 3. Manual SQL Backup Procedure (`pg_dump`)
 
 ### Prerequisites
 

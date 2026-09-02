@@ -64,7 +64,7 @@ Render free-tier services do not include external synthetic uptime polling. We c
 3. Fill in the monitor settings:
    - **Monitor Type**: `HTTP(s)`
    - **Friendly Name**: `TaskFlow API - Production`
-   - **URL (or IP)**: `https://<your-taskflow-api-slug>.onrender.com/api/v1/health`
+   - **URL (or IP)**: `https://taskflow-api-u96m.onrender.com/api/v1/health`
    - **Monitoring Interval**: `5 minutes`
    - **Monitor Timeout**: `30 seconds`
 4. Under **Select "Alert Contacts To Notify"**, check your email address.

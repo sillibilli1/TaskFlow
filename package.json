@@ -18,7 +18,8 @@
     "typecheck": "npm run typecheck --workspaces",
     "test": "npm run test --workspaces",
     "db:migrate": "node scripts/migrate.mjs",
-    "db:seed": "node scripts/seed.mjs"
+    "db:seed": "node scripts/seed.mjs",
+    "db:backup": "node scripts/backup.mjs"
   },
   "engines": {
     "node": ">=22"

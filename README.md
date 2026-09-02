@@ -4,6 +4,19 @@ A production-minded, multi-tenant project-management SaaS for software teams bui
 
 ---
 
+## Live Cloud Deployment (Render)
+
+| Component                 | Service Type       | Live Production URL                                                                                        | Status / Health                                                          |
+| :------------------------ | :----------------- | :--------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------- |
+| **Web Frontend**          | Render Static Site | [https://taskflow-web-n5jo.onrender.com](https://taskflow-web-n5jo.onrender.com)                           | `Online`                                                                 |
+| **REST API**              | Render Web Service | [https://taskflow-api-u96m.onrender.com](https://taskflow-api-u96m.onrender.com)                           | [`/api/v1/health`](https://taskflow-api-u96m.onrender.com/api/v1/health) |
+| **API Docs (Swagger)**    | OpenAPI 3.0 UI     | [https://taskflow-api-u96m.onrender.com/api/v1/docs](https://taskflow-api-u96m.onrender.com/api/v1/docs)   | `Interactive`                                                            |
+| **Readiness Diagnostics** | DB & Redis Health  | [https://taskflow-api-u96m.onrender.com/api/v1/ready](https://taskflow-api-u96m.onrender.com/api/v1/ready) | `Postgres + Redis Up`                                                    |
+| **Background Worker**     | Render Web Service | [https://taskflow-worker-zbqw.onrender.com](https://taskflow-worker-zbqw.onrender.com)                     | [`worker online`](https://taskflow-worker-zbqw.onrender.com)             |
+| **Staging Environment**   | Branch `staging`   | [sillibilli1/TaskFlow:staging](https://github.com/sillibilli1/TaskFlow/tree/staging)                       | `Separated`                                                              |
+
+---
+
 ## Cloud Architecture & Delivery (Milestone 5)
 
 TaskFlow is designed for production cloud operation with a **$0/month free-tier demonstration footprint** and a parallel **reference Infrastructure-as-Code (Terraform)** architecture for enterprise scale on AWS.
