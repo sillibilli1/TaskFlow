@@ -88,10 +88,9 @@ services:
 
   # -------------------------------------------------------------
   # TaskFlow Web - React / Vite Single Page Application
-  # -------------------------------------------------------------
-  - type: static
+  - type: web
     name: taskflow-web
-    plan: free
+    runtime: static
     buildCommand: npm install && npm run build --workspace=@cloud-saas/web
     staticPublishPath: apps/web/dist
     autoDeploy: true
