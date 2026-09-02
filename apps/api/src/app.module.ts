@@ -6,6 +6,7 @@ import {
   Inject,
   Module,
 } from "@nestjs/common";
+import { APP_INTERCEPTOR } from "@nestjs/core";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { DatabaseService } from "./db.service";
@@ -15,6 +16,10 @@ import { WorkspaceController } from "./workspace.controller";
 import { WorkspaceService } from "./workspace.service";
 import { ProductController } from "./product.controller";
 import { ProductService } from "./product.service";
+import { QueueService } from "./queue.service";
+import { StorageService } from "./storage.service";
+import { RateLimitInterceptor } from "./rate-limit.interceptor";
+import { IdempotencyInterceptor } from "./idempotency.interceptor";
 
 @Controller()
 class AppController {
@@ -58,11 +63,15 @@ class AppController {
   providers: [
     DatabaseService,
     RedisService,
+    QueueService,
+    StorageService,
     AuthService,
     WorkspaceService,
     ProductService,
     RoleGuard,
+    { provide: APP_INTERCEPTOR, useClass: RateLimitInterceptor },
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
   ],
-  exports: [AuthService, DatabaseService, RedisService],
+  exports: [AuthService, DatabaseService, RedisService, QueueService],
 })
 export class AppModule {}

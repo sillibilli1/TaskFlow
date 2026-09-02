@@ -9,8 +9,8 @@ import * as argon2 from "argon2";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import * as jwt from "jsonwebtoken";
 import { DatabaseService } from "./db.service";
-import { sendLocalEmail } from "./email.service";
 import { Role } from "./guards";
+import { QueueService } from "./queue.service";
 
 const hashToken = (value: string) =>
   createHash("sha256").update(value).digest("hex");
@@ -24,7 +24,10 @@ const tokenCookie = {
 
 @Injectable()
 export class AuthService {
-  constructor(@Inject(DatabaseService) private readonly db: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly db: DatabaseService,
+    @Inject(QueueService) private readonly queue: QueueService,
+  ) {}
   async register(email: string, password: string) {
     const normalized = email.trim().toLowerCase();
     const passwordHash = await argon2.hash(password, { type: argon2.argon2id });
@@ -208,7 +211,7 @@ export class AuthService {
     return result.rows[0] ?? null;
   }
   private emitEmail(kind: string, email: string, raw: string) {
-    void sendLocalEmail(kind, email, raw);
+    void this.queue.enqueueEmail({ kind, email, token: raw });
   }
 }
 export { tokenCookie };

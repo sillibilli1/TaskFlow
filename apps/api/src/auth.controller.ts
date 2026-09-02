@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Post,
   Query,
@@ -23,10 +24,10 @@ import {
 @Controller("auth")
 export class AuthController {
   constructor(@Inject(AuthService) private readonly auth: AuthService) {}
-  @Post("register") async register(@Body() dto: RegisterDto) {
+  @Post("register") @HttpCode(201) async register(@Body() dto: RegisterDto) {
     return this.auth.register(dto.email, dto.password);
   }
-  @Post("login") async login(
+  @Post("login") @HttpCode(200) async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {

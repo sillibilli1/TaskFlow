@@ -1,11 +1,7 @@
 import nodemailer from "nodemailer";
 
-export async function sendLocalEmail(
-  kind: string,
-  email: string,
-  token: string,
-) {
-  const transport = nodemailer.createTransport({
+function transport() {
+  return nodemailer.createTransport({
     host: process.env.SMTP_HOST ?? "sandbox.smtp.mailtrap.io",
     port: Number(process.env.SMTP_PORT ?? 2525),
     auth: {
@@ -17,6 +13,29 @@ export async function sendLocalEmail(
     greetingTimeout: 10_000,
     socketTimeout: 10_000,
   });
+}
+
+export async function sendMail(email: string, subject: string, text: string) {
+  try {
+    await transport().sendMail({
+      from: process.env.EMAIL_FROM ?? "Cloud SaaS <no-reply@localhost>",
+      to: email,
+      subject,
+      text,
+    });
+  } catch (error) {
+    console.warn(
+      "[email] delivery failed; check Mailtrap credentials and sandbox inbox",
+      error instanceof Error ? error.message : error,
+    );
+  }
+}
+
+export async function sendLocalEmail(
+  kind: string,
+  email: string,
+  token: string,
+) {
   const baseUrl = process.env.APP_URL ?? "http://localhost:5173";
   const path =
     kind === "verification"
@@ -24,22 +43,11 @@ export async function sendLocalEmail(
       : kind === "workspace-invite"
         ? `/invite?token=${token}`
         : `/reset-password?token=${token}`;
-  try {
-    await transport.sendMail({
-      from: process.env.EMAIL_FROM ?? "Cloud SaaS <no-reply@localhost>",
-      to: email,
-      subject:
-        kind === "verification"
-          ? "Verify your Cloud SaaS email"
-          : kind === "workspace-invite"
-            ? "You have been invited to Cloud SaaS"
-            : "Reset your Cloud SaaS password",
-      text: `${baseUrl}${path}`,
-    });
-  } catch (error) {
-    console.warn(
-      `[email:${kind}] delivery failed; check Mailtrap credentials and sandbox inbox`,
-      error instanceof Error ? error.message : error,
-    );
-  }
+  const subject =
+    kind === "verification"
+      ? "Verify your Cloud SaaS email"
+      : kind === "workspace-invite"
+        ? "You have been invited to Cloud SaaS"
+        : "Reset your Cloud SaaS password";
+  await sendMail(email, subject, `${baseUrl}${path}`);
 }

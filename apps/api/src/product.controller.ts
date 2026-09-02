@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Inject,
   Param,
   Patch,
@@ -19,9 +20,12 @@ import {
   WorkspaceGuard,
 } from "./guards";
 import {
+  CompleteAttachmentDto,
   CreateCommentDto,
+  CreateLabelDto,
   CreateProjectDto,
   CreateTaskDto,
+  PresignAttachmentDto,
   TaskQueryDto,
   UpdateProjectDto,
   UpdateTaskDto,
@@ -49,7 +53,7 @@ export class ProductController {
   ) {
     return this.products.project(w, id);
   }
-  @Post("projects") @Roles(...write) createProject(
+  @Post("projects") @Roles(...write) @HttpCode(201) createProject(
     @Param("workspaceId") w: string,
     @Req() r: AuthRequest,
     @Body() d: CreateProjectDto,
@@ -78,7 +82,7 @@ export class ProductController {
   ) {
     return this.products.tasks(w, p, q);
   }
-  @Post("projects/:projectId/tasks") @Roles(...write) createTask(
+  @Post("projects/:projectId/tasks") @Roles(...write) @HttpCode(201) createTask(
     @Param("workspaceId") w: string,
     @Param("projectId") p: string,
     @Req() r: AuthRequest,
@@ -115,7 +119,7 @@ export class ProductController {
   ) {
     return this.products.comments(w, t, c, Number(l));
   }
-  @Post("tasks/:taskId/comments") @Roles(...write) createComment(
+  @Post("tasks/:taskId/comments") @Roles(...write) @HttpCode(201) createComment(
     @Param("workspaceId") w: string,
     @Param("taskId") t: string,
     @Req() r: AuthRequest,
@@ -129,5 +133,74 @@ export class ProductController {
     @Query("limit") l?: string,
   ) {
     return this.products.activity(w, c, Number(l));
+  }
+  @Get("audit-events") @Roles(...read) audit(
+    @Param("workspaceId") w: string,
+    @Query("cursor") c?: string,
+    @Query("limit") l?: string,
+  ) {
+    return this.products.activity(w, c, Number(l));
+  }
+  @Get("labels") @Roles(...read) labels(@Param("workspaceId") w: string) {
+    return this.products.labels(w);
+  }
+  @Post("labels") @Roles(...write) @HttpCode(201) createLabel(
+    @Param("workspaceId") w: string,
+    @Req() r: AuthRequest,
+    @Body() d: CreateLabelDto,
+  ) {
+    return this.products.createLabel(w, r.user, d);
+  }
+  @Get("tasks/:taskId/attachments") @Roles(...read) attachments(
+    @Param("workspaceId") w: string,
+    @Param("taskId") t: string,
+  ) {
+    return this.products.attachments(w, t);
+  }
+  @Post("tasks/:taskId/attachments/presign")
+  @Roles(...write)
+  @HttpCode(201)
+  presignAttachment(
+    @Param("workspaceId") w: string,
+    @Param("taskId") t: string,
+    @Req() r: AuthRequest,
+    @Body() d: PresignAttachmentDto,
+  ) {
+    return this.products.presignAttachment(w, t, r.user, d);
+  }
+  @Post("tasks/:taskId/attachments/complete")
+  @Roles(...write)
+  @HttpCode(201)
+  completeAttachment(
+    @Param("workspaceId") w: string,
+    @Param("taskId") t: string,
+    @Req() r: AuthRequest,
+    @Body() d: CompleteAttachmentDto,
+  ) {
+    return this.products.completeAttachment(w, t, r.user, d);
+  }
+  @Get("tasks/:taskId/attachments/:attachmentId/download")
+  @Roles(...read)
+  downloadAttachment(
+    @Param("workspaceId") w: string,
+    @Param("taskId") t: string,
+    @Param("attachmentId") id: string,
+  ) {
+    return this.products.downloadAttachment(w, t, id);
+  }
+  @Get("notifications") @Roles(...read) notifications(
+    @Param("workspaceId") w: string,
+    @Req() r: AuthRequest,
+    @Query("cursor") c?: string,
+    @Query("limit") l?: string,
+  ) {
+    return this.products.notifications(w, r.user!.id, c, Number(l));
+  }
+  @Post("notifications/:notificationId/read") @Roles(...read) readNotification(
+    @Param("workspaceId") w: string,
+    @Param("notificationId") id: string,
+    @Req() r: AuthRequest,
+  ) {
+    return this.products.markNotificationRead(w, r.user!.id, id);
   }
 }

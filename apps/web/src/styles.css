@@ -5,7 +5,13 @@
 }
 
 :root {
-  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    "DM Sans",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   color: #17232f;
   background: #f6f8f8;
   font-synthesis: none;
@@ -1336,6 +1342,85 @@ textarea:focus {
   gap: 8px;
 }
 
+.label-chip,
+.chip-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eef6f2;
+  color: #267354;
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.label-options,
+.label-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.label-picker,
+.attachments-section,
+.inbox-list,
+.audit-table {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.chip-option {
+  border: 1px solid #d6e2dd;
+  background: white;
+  cursor: pointer;
+}
+
+.inline-create {
+  display: flex;
+  gap: 8px;
+}
+
+.attachment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.attachment-row,
+.inbox-item,
+.audit-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border-light);
+  background: #f8faf9;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.inbox-item.read {
+  opacity: 0.65;
+}
+
+.upload-control {
+  display: inline-flex;
+  width: fit-content;
+  background: #102b2c;
+  color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.wide-modal {
+  width: min(760px, 100%);
+}
+
 /* Auth Page */
 .auth-page,
 .loading-screen {
@@ -1402,9 +1487,11 @@ textarea:focus {
   aside {
     width: 220px;
   }
+
   .workspace-grid {
     grid-template-columns: 1fr;
   }
+
   .metrics {
     grid-template-columns: repeat(2, 1fr);
   }

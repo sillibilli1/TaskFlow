@@ -28,7 +28,7 @@ test("project CRUD is workspace-scoped and records activity", async () => {
     { rows: [{ id: project.id }], rowCount: 1 },
     { rows: [], rowCount: 1 },
   ]);
-  const service = new ProductService(db);
+  const service = new ProductService(db, {} as any, {} as any);
 
   await service.createProject("workspace-a", actor, { name: " Roadmap " });
   await service.updateProject("workspace-a", actor, project.id, {
@@ -45,8 +45,9 @@ test("project CRUD is workspace-scoped and records activity", async () => {
 test("task listing applies filters and cursor pagination", async () => {
   const { db, calls } = database([
     { rows: [{ id: "task-a" }, { id: "task-b" }], rowCount: 2 },
+    { rows: [], rowCount: 0 },
   ]);
-  const service = new ProductService(db);
+  const service = new ProductService(db, {} as any, {} as any);
   const result = await service.tasks("workspace-a", "project-a", {
     cursor: "task-z",
     limit: 1,
@@ -59,7 +60,10 @@ test("task listing applies filters and cursor pagination", async () => {
     search: "launch",
   });
 
-  assert.deepEqual(result, { items: [{ id: "task-a" }], nextCursor: "task-a" });
+  assert.deepEqual(result, {
+    items: [{ id: "task-a", labels: [] }],
+    nextCursor: "task-a",
+  });
   assert.match(calls[0].sql, /t\.id < \$3/);
   assert.match(calls[0].sql, /t\.status/);
   assert.match(calls[0].sql, /t\.priority/);
@@ -76,12 +80,19 @@ test("task and comment writes are scoped and emit activity", async () => {
   const { db, calls } = database([
     { rows: [task], rowCount: 1 },
     { rows: [], rowCount: 1 },
+    { rows: [], rowCount: 0 },
+    { rows: [{ assignee_id: null, title: "Build" }], rowCount: 1 },
     { rows: [task], rowCount: 1 },
     { rows: [], rowCount: 1 },
+    { rows: [], rowCount: 0 },
     { rows: [comment], rowCount: 1 },
     { rows: [], rowCount: 1 },
+    {
+      rows: [{ assignee_id: null, created_by: "user-a", title: "Build" }],
+      rowCount: 1,
+    },
   ]);
-  const service = new ProductService(db);
+  const service = new ProductService(db, {} as any, {} as any);
   await service.createTask("workspace-a", "project-a", actor, {
     title: "Build",
   });
@@ -91,8 +102,8 @@ test("task and comment writes are scoped and emit activity", async () => {
   });
 
   assert.match(calls[0].sql, /WHERE EXISTS.*projects/s);
-  assert.match(calls[2].sql, /workspace_id=\$1 AND id=\$2/);
-  assert.match(calls[4].sql, /WHERE EXISTS.*tasks/s);
+  assert.match(calls[4].sql, /workspace_id=\$1 AND id=\$2/);
+  assert.match(calls[7].sql, /WHERE EXISTS.*tasks/s);
   assert.equal(
     calls.filter((call) => call.sql.includes("activity_events")).length,
     3,
@@ -101,7 +112,7 @@ test("task and comment writes are scoped and emit activity", async () => {
 
 test("missing product records return not found", async () => {
   const { db } = database([{ rows: [], rowCount: 0 }]);
-  const service = new ProductService(db);
+  const service = new ProductService(db, {} as any, {} as any);
   await assert.rejects(
     () => service.project("workspace-b", "project-a"),
     NotFoundException,

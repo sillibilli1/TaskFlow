@@ -7,11 +7,16 @@
     "build": "tsc -p tsconfig.json",
     "lint": "tsc --noEmit -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "node --test"
+    "test": "tsx --test src/**/*.test.ts"
   },
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "ioredis": "^5.4.1",
+    "nodemailer": "^6.9.16"
+  },
   "devDependencies": {
     "@types/node": "^22.9.0",
+    "@types/nodemailer": "^6.4.16",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3"
   }

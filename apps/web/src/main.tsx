@@ -14,6 +14,24 @@ type Project = {
   status?: string;
   created_at?: string;
 };
+type Label = { id: string; name: string; color: string };
+type Member = { id: string; email: string; role: string };
+type Attachment = {
+  id: string;
+  filename: string;
+  size_bytes: number;
+  mime_type: string;
+  uploaded_by: string;
+  created_at: string;
+};
+type NotificationItem = {
+  id: string;
+  type: string;
+  title: string;
+  body: string;
+  read_at?: string | null;
+  created_at: string;
+};
 type Task = {
   id: string;
   title: string;
@@ -22,9 +40,11 @@ type Task = {
   priority: string;
   due_date?: string | null;
   dueDate?: string | null;
+  assignee_id?: string | null;
   projectId?: string;
   project_id?: string;
   created_at?: string;
+  labels?: Label[];
 };
 type Comment = {
   id: string;
@@ -98,18 +118,50 @@ function TaskFlowLogo({
 // ==========================================
 // Professional SVG Icons
 // ==========================================
-function IconPlus({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconPlus({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }
 
-function IconUsers({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconUsers({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
       <circle cx="9" cy="7" r="4" />
       <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -118,17 +170,49 @@ function IconUsers({ size = 16, className = "" }: { size?: number; className?: s
   );
 }
 
-function IconFolder({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconFolder({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
 
-function IconCalendar({ size = 14, className = "" }: { size?: number; className?: string }) {
+function IconCalendar({
+  size = 14,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
@@ -137,45 +221,125 @@ function IconCalendar({ size = 14, className = "" }: { size?: number; className?
   );
 }
 
-function IconCheckSquare({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconCheckSquare({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <polyline points="9 11 12 14 22 4" />
       <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   );
 }
 
-function IconClock({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconClock({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }
 
-function IconCheckCircle({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconCheckCircle({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
       <polyline points="22 4 12 14.01 9 11.01" />
     </svg>
   );
 }
 
-function IconLock({ size = 14, className = "" }: { size?: number; className?: string }) {
+function IconLock({
+  size = 14,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
       <path d="M7 11V7a5 5 0 0 1 10 0v4" />
     </svg>
   );
 }
 
-function IconTrash({ size = 15, className = "" }: { size?: number; className?: string }) {
+function IconTrash({
+  size = 15,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <polyline points="3 6 5 6 21 6" />
       <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       <line x1="10" y1="11" x2="10" y2="17" />
@@ -184,18 +348,50 @@ function IconTrash({ size = 15, className = "" }: { size?: number; className?: s
   );
 }
 
-function IconSearch({ size = 15, className = "" }: { size?: number; className?: string }) {
+function IconSearch({
+  size = 15,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 }
 
-function IconMenu({ size = 20, className = "" }: { size?: number; className?: string }) {
+function IconMenu({
+  size = 20,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <line x1="3" y1="12" x2="21" y2="12" />
       <line x1="3" y1="6" x2="21" y2="6" />
       <line x1="3" y1="18" x2="21" y2="18" />
@@ -203,35 +399,99 @@ function IconMenu({ size = 20, className = "" }: { size?: number; className?: st
   );
 }
 
-function IconClose({ size = 18, className = "" }: { size?: number; className?: string }) {
+function IconClose({
+  size = 18,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }
 
-function IconActivity({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconActivity({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
     </svg>
   );
 }
 
-function IconSend({ size = 15, className = "" }: { size?: number; className?: string }) {
+function IconSend({
+  size = 15,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <line x1="22" y1="2" x2="11" y2="13" />
       <polygon points="22 2 15 22 11 13 2 9 22 2" />
     </svg>
   );
 }
 
-function IconLogOut({ size = 15, className = "" }: { size?: number; className?: string }) {
+function IconLogOut({
+  size = 15,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
@@ -239,9 +499,74 @@ function IconLogOut({ size = 15, className = "" }: { size?: number; className?: 
   );
 }
 
-function IconLayers({ size = 16, className = "" }: { size?: number; className?: string }) {
+function IconPaperclip({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`svg-icon ${className}`}>
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
+      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+  );
+}
+
+function IconBell({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
+      <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+    </svg>
+  );
+}
+
+function IconLayers({
+  size = 16,
+  className = "",
+}: {
+  size?: number;
+  className?: string;
+}) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={`svg-icon ${className}`}
+    >
       <polygon points="12 2 2 7 12 12 22 7 12 2" />
       <polyline points="2 17 12 22 22 17" />
       <polyline points="2 12 12 17 22 12" />
@@ -254,11 +579,26 @@ function IconLayers({ size = 16, className = "" }: { size?: number; className?: 
 // ==========================================
 const API = "/api/v1";
 
+function newIdempotencyKey() {
+  return crypto.randomUUID();
+}
+
 async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const method = (options.method ?? "GET").toUpperCase();
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...((options.headers as Record<string, string> | undefined) ?? {}),
+  };
+  if (
+    ["POST", "PATCH", "PUT", "DELETE"].includes(method) &&
+    !headers["Idempotency-Key"]
+  ) {
+    headers["Idempotency-Key"] = newIdempotencyKey();
+  }
   const response = await fetch(`${API}${path}`, {
     ...options,
     credentials: "include",
-    headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
+    headers,
   });
   const contentType = response.headers.get("content-type");
   const isJson = contentType && contentType.includes("application/json");
@@ -391,6 +731,11 @@ export function App() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState("");
   const [activities, setActivities] = useState<ActivityEvent[]>([]);
+  const [labels, setLabels] = useState<Label[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [inbox, setInbox] = useState<NotificationItem[]>([]);
+  const [showAuditLog, setShowAuditLog] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notification, setNotification] = useState("");
@@ -412,18 +757,28 @@ export function App() {
   const [newTaskStatus, setNewTaskStatus] = useState("todo");
   const [newTaskPriority, setNewTaskPriority] = useState("medium");
   const [newTaskDueDate, setNewTaskDueDate] = useState("");
+  const [newTaskLabelIds, setNewTaskLabelIds] = useState<string[]>([]);
+  const [newTaskAssigneeId, setNewTaskAssigneeId] = useState("");
+  const [newLabelName, setNewLabelName] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<"viewer" | "member" | "admin">("viewer");
+  const [inviteRole, setInviteRole] = useState<"viewer" | "member" | "admin">(
+    "viewer",
+  );
 
   // Role permissions
   const canWrite = useMemo(() => {
-    return workspace?.role ? ["owner", "admin", "member"].includes(workspace.role) : false;
+    return workspace?.role
+      ? ["owner", "admin", "member"].includes(workspace.role)
+      : false;
   }, [workspace]);
 
   const isOwnerOrAdmin = useMemo(() => {
-    return workspace?.role ? ["owner", "admin"].includes(workspace.role) : false;
+    return workspace?.role
+      ? ["owner", "admin"].includes(workspace.role)
+      : false;
   }, [workspace]);
 
   // Handle URL tokens
@@ -432,11 +787,24 @@ export function App() {
     const token = params.get("token");
     const pathname = window.location.pathname;
 
-    if (token && (pathname.includes("verify") || window.location.search.includes("verify") || !pathname.includes("invite"))) {
-      api<{ verified: boolean }>(`/auth/verify-email?token=${encodeURIComponent(token)}`)
+    if (
+      token &&
+      (pathname.includes("verify") ||
+        window.location.search.includes("verify") ||
+        !pathname.includes("invite"))
+    ) {
+      api<{ verified: boolean }>(
+        `/auth/verify-email?token=${encodeURIComponent(token)}`,
+      )
         .then(() => {
-          setNotification("Your email has been verified successfully. You can now sign in.");
-          window.history.replaceState({}, document.title, window.location.pathname);
+          setNotification(
+            "Your email has been verified successfully. You can now sign in.",
+          );
+          window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname,
+          );
         })
         .catch((e) => {
           setError(e.message || "Email verification failed or token expired.");
@@ -516,6 +884,9 @@ export function App() {
   useEffect(() => {
     refreshProjects();
     refreshActivity();
+    refreshLabels();
+    refreshMembers();
+    refreshInbox();
   }, [workspace]);
 
   // Fetch tasks
@@ -550,15 +921,59 @@ export function App() {
 
   useEffect(() => {
     refreshComments();
+    refreshAttachments();
   }, [selectedTask, workspace]);
 
-  // Fetch activity
   function refreshActivity() {
     if (!workspace) return;
     api<{ items: ActivityEvent[] }>(
-      `/workspaces/${workspace.id}/activity-events?limit=25`,
+      `/workspaces/${workspace.id}/audit-events?limit=50`,
     )
       .then((r) => setActivities(r?.items ?? []))
+      .catch(() => {});
+  }
+
+  function refreshLabels() {
+    if (!workspace) {
+      setLabels([]);
+      return;
+    }
+    api<{ items: Label[] }>(`/workspaces/${workspace.id}/labels`)
+      .then((r) => setLabels(r?.items ?? []))
+      .catch(() => {});
+  }
+
+  function refreshMembers() {
+    if (!workspace) {
+      setMembers([]);
+      return;
+    }
+    api<{ items: Member[] }>(`/workspaces/${workspace.id}/members`)
+      .then((r) => setMembers(r?.items ?? []))
+      .catch(() => {});
+  }
+
+  function refreshInbox() {
+    if (!workspace) {
+      setInbox([]);
+      return;
+    }
+    api<{ items: NotificationItem[] }>(
+      `/workspaces/${workspace.id}/notifications?limit=20`,
+    )
+      .then((r) => setInbox(r?.items ?? []))
+      .catch(() => {});
+  }
+
+  function refreshAttachments() {
+    if (!selectedTask || !workspace) {
+      setAttachments([]);
+      return;
+    }
+    api<{ items: Attachment[] }>(
+      `/workspaces/${workspace.id}/tasks/${selectedTask.id}/attachments`,
+    )
+      .then((r) => setAttachments(r?.items ?? []))
       .catch(() => {});
   }
 
@@ -623,7 +1038,13 @@ export function App() {
 
   // Action: Delete Project
   async function deleteProject(projectId: string) {
-    if (!workspace || !confirm("Are you sure you want to delete this project and all its tasks?")) return;
+    if (
+      !workspace ||
+      !confirm(
+        "Are you sure you want to delete this project and all its tasks?",
+      )
+    )
+      return;
     try {
       await api(`/workspaces/${workspace.id}/projects/${projectId}`, {
         method: "DELETE",
@@ -640,7 +1061,6 @@ export function App() {
     }
   }
 
-  // Action: Create Task
   async function handleCreateTask(e: FormEvent) {
     e.preventDefault();
     if (!workspace || !project || !newTaskTitle.trim()) return;
@@ -655,6 +1075,8 @@ export function App() {
             status: newTaskStatus,
             priority: newTaskPriority,
             dueDate: newTaskDueDate || undefined,
+            labelIds: newTaskLabelIds,
+            assigneeId: newTaskAssigneeId || undefined,
           }),
         },
       );
@@ -664,11 +1086,108 @@ export function App() {
       setNewTaskStatus("todo");
       setNewTaskPriority("medium");
       setNewTaskDueDate("");
+      setNewTaskLabelIds([]);
+      setNewTaskAssigneeId("");
       setShowNewTaskModal(false);
       setNotification(`Task created successfully.`);
       refreshActivity();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Unable to create task");
+    }
+  }
+
+  async function handleCreateLabel(e: FormEvent) {
+    e.preventDefault();
+    if (!workspace || !newLabelName.trim()) return;
+    try {
+      const created = await api<Label>(`/workspaces/${workspace.id}/labels`, {
+        method: "POST",
+        body: JSON.stringify({ name: newLabelName.trim() }),
+      });
+      setLabels(
+        [...labels, created].sort((a, b) => a.name.localeCompare(b.name)),
+      );
+      setNewLabelName("");
+      setNotification(`Label "${created.name}" created.`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to create label");
+    }
+  }
+
+  async function handleUploadAttachment(file: File) {
+    if (!workspace || !selectedTask) return;
+    setUploading(true);
+    try {
+      const presign = await api<{
+        attachmentId: string;
+        signedUrl: string;
+        token: string;
+        path: string;
+      }>(
+        `/workspaces/${workspace.id}/tasks/${selectedTask.id}/attachments/presign`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            filename: file.name,
+            mimeType: file.type || "text/plain",
+            size: file.size,
+          }),
+        },
+      );
+      const upload = await fetch(presign.signedUrl, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${presign.token}`,
+          "Content-Type": file.type || "text/plain",
+          "x-upsert": "false",
+        },
+        body: file,
+      });
+      if (!upload.ok) throw new Error("Storage upload failed");
+      await api(
+        `/workspaces/${workspace.id}/tasks/${selectedTask.id}/attachments/complete`,
+        {
+          method: "POST",
+          body: JSON.stringify({ attachmentId: presign.attachmentId }),
+        },
+      );
+      setNotification(`Uploaded ${file.name}.`);
+      refreshAttachments();
+      refreshActivity();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to upload file");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function openAttachment(attachment: Attachment) {
+    if (!workspace || !selectedTask) return;
+    try {
+      const result = await api<{ signedUrl: string }>(
+        `/workspaces/${workspace.id}/tasks/${selectedTask.id}/attachments/${attachment.id}/download`,
+      );
+      window.open(result.signedUrl, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to download file");
+    }
+  }
+
+  async function markInboxRead(item: NotificationItem) {
+    if (!workspace || item.read_at) return;
+    try {
+      await api(`/workspaces/${workspace.id}/notifications/${item.id}/read`, {
+        method: "POST",
+      });
+      setInbox(
+        inbox.map((entry) =>
+          entry.id === item.id
+            ? { ...entry, read_at: new Date().toISOString() }
+            : entry,
+        ),
+      );
+    } catch {
+      /* non-blocking */
     }
   }
 
@@ -680,9 +1199,15 @@ export function App() {
         `/workspaces/${workspace.id}/tasks/${task.id}`,
         { method: "PATCH", body: JSON.stringify({ status }) },
       );
-      setTasks(tasks.map((t) => (t.id === task.id ? { ...t, status: updated.status } : t)));
+      setTasks(
+        tasks.map((t) =>
+          t.id === task.id ? { ...t, status: updated.status } : t,
+        ),
+      );
       if (selectedTask?.id === task.id) {
-        setSelectedTask((prev) => (prev ? { ...prev, status: updated.status } : null));
+        setSelectedTask((prev) =>
+          prev ? { ...prev, status: updated.status } : null,
+        );
       }
       refreshActivity();
     } catch (e) {
@@ -869,7 +1394,8 @@ export function App() {
                 {user.email}
               </span>
               <span className="user-sub">
-                Role: {workspace?.role ? workspace.role.toUpperCase() : "MEMBER"}
+                Role:{" "}
+                {workspace?.role ? workspace.role.toUpperCase() : "MEMBER"}
               </span>
             </div>
           </div>
@@ -884,7 +1410,9 @@ export function App() {
         <header>
           <div>
             <div className="workspace-tag">
-              <span className="eyebrow">{workspace?.name ?? "Your workspace"}</span>
+              <span className="eyebrow">
+                {workspace?.name ?? "Your workspace"}
+              </span>
               {workspace && (
                 <span className={`role-pill ${workspace.role}`}>
                   {workspace.role === "viewer"
@@ -897,6 +1425,14 @@ export function App() {
           </div>
 
           <div className="header-actions">
+            {workspace && (
+              <button
+                className="secondary-btn"
+                onClick={() => setShowAuditLog(true)}
+              >
+                <IconActivity size={16} /> Audit log
+              </button>
+            )}
             {isOwnerOrAdmin && (
               <button
                 className="secondary-btn"
@@ -1043,7 +1579,9 @@ export function App() {
                     icon={<IconFolder size={32} />}
                     title="Create your first project"
                     text="Projects give your team a clear place to get work done."
-                    action={canWrite ? () => setShowNewProjectModal(true) : undefined}
+                    action={
+                      canWrite ? () => setShowNewProjectModal(true) : undefined
+                    }
                     actionText={canWrite ? "Create project" : undefined}
                   />
                 ) : (
@@ -1100,12 +1638,18 @@ export function App() {
                                 <div className="task-meta-line">
                                   {dueDateVal && (
                                     <span className="due-badge">
-                                      <IconCalendar size={12} /> {dueDateVal.split("T")[0]}
+                                      <IconCalendar size={12} />{" "}
+                                      {dueDateVal.split("T")[0]}
                                     </span>
                                   )}
                                   <span className={`priority ${task.priority}`}>
                                     {task.priority}
                                   </span>
+                                  {(task.labels ?? []).map((label) => (
+                                    <span className="label-chip" key={label.id}>
+                                      {label.name}
+                                    </span>
+                                  ))}
                                 </div>
                               </div>
 
@@ -1128,7 +1672,9 @@ export function App() {
                                     <option value="cancelled">Cancelled</option>
                                   </select>
                                 ) : (
-                                  <span className={`status-pill ${task.status}`}>
+                                  <span
+                                    className={`status-pill ${task.status}`}
+                                  >
                                     {task.status.replace("_", " ")}
                                   </span>
                                 )}
@@ -1138,7 +1684,10 @@ export function App() {
                         })
                       ) : (
                         <div className="empty-tasks-placeholder">
-                          <IconCheckSquare size={28} className="empty-icon-svg" />
+                          <IconCheckSquare
+                            size={28}
+                            className="empty-icon-svg"
+                          />
                           <h4>No tasks here</h4>
                           <p>
                             {searchQuery || filter !== "all"
@@ -1165,12 +1714,29 @@ export function App() {
                 <div className="panel-head">
                   <div>
                     <p className="eyebrow">Team pulse</p>
-                    <h3>Activity</h3>
+                    <h3>Inbox & activity</h3>
                   </div>
                   <span className="live-dot">
                     <IconActivity size={12} /> Live
                   </span>
                 </div>
+                {inbox.length > 0 && (
+                  <div className="inbox-list">
+                    {inbox.slice(0, 5).map((item) => (
+                      <button
+                        className={`inbox-item ${item.read_at ? "read" : ""}`}
+                        key={item.id}
+                        onClick={() => markInboxRead(item)}
+                      >
+                        <IconBell size={14} />
+                        <span>
+                          <strong>{item.title}</strong>
+                          <small>{item.body}</small>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 <div className="activity-container">
                   {activities.length ? (
@@ -1183,10 +1749,14 @@ export function App() {
                               <strong>
                                 {act.actor_id === user.id ? "You" : "Teammate"}
                               </strong>{" "}
-                              {act.action === "created" && `created a ${act.entity_type}`}
-                              {act.action === "status_changed" && `updated task status`}
-                              {act.action === "updated" && `updated a ${act.entity_type}`}
-                              {act.action === "deleted" && `deleted a ${act.entity_type}`}
+                              {act.action === "created" &&
+                                `created a ${act.entity_type}`}
+                              {act.action === "status_changed" &&
+                                `updated task status`}
+                              {act.action === "updated" &&
+                                `updated a ${act.entity_type}`}
+                              {act.action === "deleted" &&
+                                `deleted a ${act.entity_type}`}
                             </p>
                             <span className="activity-time">
                               {new Date(act.created_at).toLocaleTimeString([], {
@@ -1382,6 +1952,65 @@ export function App() {
                 </label>
               </div>
 
+              <label>
+                Assignee
+                <select
+                  value={newTaskAssigneeId}
+                  onChange={(e) => setNewTaskAssigneeId(e.target.value)}
+                >
+                  <option value="">Unassigned</option>
+                  {members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.email}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <div className="label-picker">
+                <span>Labels</span>
+                {labels.length ? (
+                  <div className="label-options">
+                    {labels.map((label) => (
+                      <label className="chip-option" key={label.id}>
+                        <input
+                          type="checkbox"
+                          checked={newTaskLabelIds.includes(label.id)}
+                          onChange={() =>
+                            setNewTaskLabelIds((current) =>
+                              current.includes(label.id)
+                                ? current.filter((id) => id !== label.id)
+                                : [...current, label.id],
+                            )
+                          }
+                        />
+                        {label.name}
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted-small">
+                    No labels yet. Create one below.
+                  </p>
+                )}
+                {canWrite && (
+                  <div className="inline-create">
+                    <input
+                      placeholder="New label name"
+                      value={newLabelName}
+                      onChange={(e) => setNewLabelName(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      className="secondary-btn"
+                      onClick={handleCreateLabel}
+                    >
+                      Add label
+                    </button>
+                  </div>
+                )}
+              </div>
+
               <div className="modal-buttons">
                 <button
                   type="button"
@@ -1434,11 +2063,15 @@ export function App() {
                 <select
                   value={inviteRole}
                   onChange={(e) =>
-                    setInviteRole(e.target.value as "viewer" | "member" | "admin")
+                    setInviteRole(
+                      e.target.value as "viewer" | "member" | "admin",
+                    )
                   }
                 >
                   <option value="viewer">Viewer (Read-only access)</option>
-                  <option value="member">Member (Can create & edit tasks)</option>
+                  <option value="member">
+                    Member (Can create & edit tasks)
+                  </option>
                   <option value="admin">Admin (Full workspace control)</option>
                 </select>
               </label>
@@ -1446,17 +2079,20 @@ export function App() {
               <div className="role-explainer">
                 {inviteRole === "viewer" && (
                   <span>
-                    <strong>Viewer</strong> can view projects, tasks, comments, and activity, but cannot create or edit items.
+                    <strong>Viewer</strong> can view projects, tasks, comments,
+                    and activity, but cannot create or edit items.
                   </span>
                 )}
                 {inviteRole === "member" && (
                   <span>
-                    <strong>Member</strong> can create and manage tasks, update status, and post comments.
+                    <strong>Member</strong> can create and manage tasks, update
+                    status, and post comments.
                   </span>
                 )}
                 {inviteRole === "admin" && (
                   <span>
-                    <strong>Admin</strong> has full management permissions including inviting other members.
+                    <strong>Admin</strong> has full management permissions
+                    including inviting other members.
                   </span>
                 )}
               </div>
@@ -1500,7 +2136,12 @@ export function App() {
               </span>
               {(selectedTask.dueDate || selectedTask.due_date) && (
                 <span className="due-meta">
-                  <IconCalendar size={13} /> Due {(selectedTask.dueDate || selectedTask.due_date)?.split("T")[0]}
+                  <IconCalendar size={13} /> Due{" "}
+                  {
+                    (selectedTask.dueDate || selectedTask.due_date)?.split(
+                      "T",
+                    )[0]
+                  }
                 </span>
               )}
             </div>
@@ -1532,6 +2173,55 @@ export function App() {
                 </button>
               </div>
             )}
+
+            {(selectedTask.labels ?? []).length > 0 && (
+              <div className="label-row">
+                {selectedTask.labels!.map((label) => (
+                  <span className="label-chip" key={label.id}>
+                    {label.name}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="attachments-section">
+              <h3>
+                <IconPaperclip size={15} /> Attachments ({attachments.length})
+              </h3>
+              {attachments.length ? (
+                <div className="attachment-list">
+                  {attachments.map((file) => (
+                    <button
+                      className="attachment-row"
+                      key={file.id}
+                      onClick={() => openAttachment(file)}
+                    >
+                      <strong>{file.filename}</strong>
+                      <small>
+                        {Math.max(1, Math.round(file.size_bytes / 1024))} KB
+                      </small>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <p className="muted-small">No files attached yet.</p>
+              )}
+              {canWrite && (
+                <label className="upload-control">
+                  {uploading ? "Uploading…" : "Upload file"}
+                  <input
+                    type="file"
+                    hidden
+                    disabled={uploading}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void handleUploadAttachment(file);
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
+            </div>
 
             {/* Comments Section */}
             <div className="comments-section">
@@ -1581,8 +2271,49 @@ export function App() {
                 </form>
               ) : (
                 <div className="read-only-notice">
-                  <IconLock size={14} /> You are viewing this workspace as a <strong>Viewer</strong>. Write actions and commenting are disabled.
+                  <IconLock size={14} /> You are viewing this workspace as a{" "}
+                  <strong>Viewer</strong>. Write actions and commenting are
+                  disabled.
                 </div>
+              )}
+            </div>
+          </section>
+        </div>
+      )}
+
+      {/* Modal: Workspace Audit Log */}
+      {showAuditLog && (
+        <div className="modal-backdrop" onClick={() => setShowAuditLog(false)}>
+          <section
+            className="modal wide-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="modal-close"
+              onClick={() => setShowAuditLog(false)}
+            >
+              <IconClose size={18} />
+            </button>
+            <p className="eyebrow">Workspace: {workspace?.name}</p>
+            <h2>Audit log</h2>
+            <p className="muted">
+              Immutable workspace history from activity events, including
+              projects, tasks, comments, and attachments.
+            </p>
+            <div className="audit-table">
+              {activities.length ? (
+                activities.map((act) => (
+                  <div className="audit-row" key={act.id}>
+                    <strong>
+                      {act.actor_id === user.id ? "You" : "Teammate"}{" "}
+                      {act.action} {act.entity_type}
+                    </strong>
+                    <span>{new Date(act.created_at).toLocaleString()}</span>
+                    <small>{act.entity_id}</small>
+                  </div>
+                ))
+              ) : (
+                <p className="muted-small">No audit events yet.</p>
               )}
             </div>
           </section>

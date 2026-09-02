@@ -42,13 +42,29 @@ npm run dev --workspace=@cloud-saas/web
 
 The API is available at `http://localhost:3000/api/v1/health` and its OpenAPI documentation is at `http://localhost:3000/api/v1/docs`. Mailtrap displays captured sandbox emails in its dashboard; no local SMTP container is needed.
 
+Start the background worker in a third terminal so email and notification jobs are processed from Upstash Redis instead of blocking API requests:
+
+```powershell
+npm run dev --workspace=@cloud-saas/worker
+```
+
+### Supabase Storage attachments
+
+Task attachments use a private Supabase Storage bucket named `attachments` (already created in the project). The API issues pre-signed upload URLs with `createSignedUploadUrl` and pre-signed download URLs with `createSignedUrl`. Set these in `.env`:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `SUPABASE_STORAGE_BUCKET=attachments`
+
+Allowed uploads: jpg, png, webp, PDF, docx, xlsx, csv, and txt, with a 10MB maximum. Mutating API requests (`POST`/`PATCH`/`DELETE`) are rate limited and accept an `Idempotency-Key` header so retries do not create duplicate records.
+
 The repository still includes `docker-compose.yml` and the Dockerfiles for CI and the later Render deployment path. They are not part of the normal local development workflow.
 
 ## Workspace layout
 
 - `apps/api` — NestJS REST API
 - `apps/web` — React/Vite frontend
-- `apps/worker` — background worker process shell
+- `apps/worker` — Redis-backed email and notification worker
 - `packages` — shared packages added when boundaries are established
 - `infra` — later infrastructure documentation and Terraform reference
 - `tests` — integration and end-to-end test locations
@@ -64,4 +80,4 @@ npm run test
 npm run format:check
 ```
 
-The API uses `/api/v1` versioning, strict request validation, cursor-based pagination, and Swagger/OpenAPI documentation. Phase 2 includes identity and tenancy; Phase 3 will add the core product workflow.
+The API uses `/api/v1` versioning, strict request validation, cursor-based pagination, and Swagger/OpenAPI documentation. Phase 4 adds attachments, async email jobs, in-app/email notifications, a workspace audit log, mutation rate limiting, and idempotency keys.

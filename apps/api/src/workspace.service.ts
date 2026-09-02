@@ -8,14 +8,17 @@ import { randomBytes, createHash } from "node:crypto";
 import { DatabaseService } from "./db.service";
 import { InviteDto, CreateWorkspaceDto } from "./dtos";
 import { AuthRequest, Role } from "./guards";
-import { sendLocalEmail } from "./email.service";
+import { QueueService } from "./queue.service";
 
 const digest = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 
 @Injectable()
 export class WorkspaceService {
-  constructor(@Inject(DatabaseService) private readonly db: DatabaseService) {}
+  constructor(
+    @Inject(DatabaseService) private readonly db: DatabaseService,
+    @Inject(QueueService) private readonly queue: QueueService,
+  ) {}
 
   async create(userId: string, dto: CreateWorkspaceDto) {
     return this.db.transaction(async (client) => {
@@ -48,7 +51,11 @@ export class WorkspaceService {
       "INSERT INTO workspace_invitations (workspace_id,email,role,token_hash,expires_at,invited_by) VALUES ($1,$2,$3,$4,now()+interval '7 days',$5) RETURNING id,expires_at",
       [workspaceId, email, dto.role, digest(raw), actor.id],
     );
-    void sendLocalEmail("workspace-invite", email, raw);
+    void this.queue.enqueueEmail({
+      kind: "workspace-invite",
+      email,
+      token: raw,
+    });
     return {
       id: result.rows[0].id,
       email,
@@ -115,6 +122,17 @@ export class WorkspaceService {
     return { items, nextCursor: hasNext ? (items.at(-1)?.id ?? null) : null };
   }
 
+  async members(workspaceId: string) {
+    const rows = await this.db.query<{
+      id: string;
+      email: string;
+      role: Role;
+    }>(
+      "SELECT u.id,u.email,wm.role FROM workspace_members wm JOIN users u ON u.id=wm.user_id WHERE wm.workspace_id=$1 AND wm.joined_at IS NOT NULL ORDER BY u.email",
+      [workspaceId],
+    );
+    return { items: rows.rows };
+  }
   async getMembership(workspaceId: string, userId: string) {
     const result = await this.db.query<{ role: Role }>(
       "SELECT role FROM workspace_members WHERE workspace_id=$1 AND user_id=$2 AND joined_at IS NOT NULL",

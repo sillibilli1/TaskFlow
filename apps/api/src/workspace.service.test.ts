@@ -10,7 +10,7 @@ test("workspace listing is scoped by authenticated user", async () => {
       return { rows: [], rowCount: 0 };
     },
   } as any;
-  const service = new WorkspaceService(db);
+  const service = new WorkspaceService(db, {} as any);
   await service.list("user-a", undefined, 20);
   assert.deepEqual(queries[0], ["user-a", 21]);
 });
@@ -23,7 +23,7 @@ test("membership lookup always binds workspace and user", async () => {
       return { rows: [], rowCount: 0 };
     },
   } as any;
-  const service = new WorkspaceService(db);
+  const service = new WorkspaceService(db, {} as any);
   await service.getMembership("workspace-b", "user-a");
   assert.deepEqual(queries[0], ["workspace-b", "user-a"]);
 });

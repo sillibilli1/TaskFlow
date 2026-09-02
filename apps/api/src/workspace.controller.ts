@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Param,
   Post,
@@ -24,7 +25,7 @@ export class WorkspaceController {
   constructor(
     @Inject(WorkspaceService) private readonly workspaces: WorkspaceService,
   ) {}
-  @Post() @UseGuards(AuthGuard) create(
+  @Post() @UseGuards(AuthGuard) @HttpCode(201) create(
     @Req() req: AuthRequest,
     @Body() dto: CreateWorkspaceDto,
   ) {
@@ -37,9 +38,16 @@ export class WorkspaceController {
   ) {
     return this.workspaces.list(req.user!.id, cursor, Number(limit ?? 20));
   }
+  @Get(":workspaceId/members")
+  @UseGuards(AuthGuard, WorkspaceGuard, RoleGuard)
+  @Roles("owner", "admin", "member", "viewer")
+  members(@Param("workspaceId") workspaceId: string) {
+    return this.workspaces.members(workspaceId);
+  }
   @Post(":workspaceId/invitations")
   @UseGuards(AuthGuard, WorkspaceGuard, RoleGuard)
   @Roles("owner", "admin")
+  @HttpCode(201)
   invite(
     @Param("workspaceId") workspaceId: string,
     @Req() req: AuthRequest,
@@ -47,7 +55,7 @@ export class WorkspaceController {
   ) {
     return this.workspaces.invite(workspaceId, req.user, dto);
   }
-  @Post("invitations/accept") @UseGuards(AuthGuard) accept(
+  @Post("invitations/accept") @UseGuards(AuthGuard) @HttpCode(201) accept(
     @Req() req: AuthRequest,
     @Body() dto: TokenDto,
   ) {

@@ -15,6 +15,14 @@ const service = {
   comments: async (...args: unknown[]) => args,
   createComment: async (...args: unknown[]) => args,
   activity: async (...args: unknown[]) => args,
+  labels: async (...args: unknown[]) => args,
+  createLabel: async (...args: unknown[]) => args,
+  attachments: async (...args: unknown[]) => args,
+  presignAttachment: async (...args: unknown[]) => args,
+  completeAttachment: async (...args: unknown[]) => args,
+  downloadAttachment: async (...args: unknown[]) => args,
+  notifications: async (...args: unknown[]) => args,
+  markNotificationRead: async (...args: unknown[]) => args,
 } as any;
 
 test("product controller forwards workspace, actor, payload, and query values", async () => {
@@ -46,4 +54,17 @@ test("product controller forwards workspace, actor, payload, and query values", 
     "cursor-a",
     3,
   ]);
+  assert.deepEqual(
+    await controller.presignAttachment("workspace-a", "task-a", request, {
+      filename: "notes.txt",
+      mimeType: "text/plain",
+      size: 12,
+    }),
+    [
+      "workspace-a",
+      "task-a",
+      request.user,
+      { filename: "notes.txt", mimeType: "text/plain", size: 12 },
+    ],
+  );
 });
