@@ -13,7 +13,8 @@ A production-minded, multi-tenant project-management SaaS for software teams bui
 | **API Docs (Swagger)**    | OpenAPI 3.0 UI     | [https://taskflow-api-u96m.onrender.com/api/v1/docs](https://taskflow-api-u96m.onrender.com/api/v1/docs)   | `Interactive`                                                            |
 | **Readiness Diagnostics** | DB & Redis Health  | [https://taskflow-api-u96m.onrender.com/api/v1/ready](https://taskflow-api-u96m.onrender.com/api/v1/ready) | `Postgres + Redis Up`                                                    |
 | **Background Worker**     | Render Web Service | [https://taskflow-worker-zbqw.onrender.com](https://taskflow-worker-zbqw.onrender.com)                     | [`worker online`](https://taskflow-worker-zbqw.onrender.com)             |
-| **Staging Environment**   | Branch `staging`   | [sillibilli1/TaskFlow:staging](https://github.com/sillibilli1/TaskFlow/tree/staging)                       | `Separated`                                                              |
+| **Staging API**           | Render Web Service | [https://taskflow-api-staging-3lou.onrender.com](https://taskflow-api-staging-3lou.onrender.com)           | [`/api/v1/health`](https://taskflow-api-staging-3lou.onrender.com/api/v1/health) |
+| **Staging Branch**        | Branch `staging`   | [sillibilli1/TaskFlow:staging](https://github.com/sillibilli1/TaskFlow/tree/staging)                       | `Separated`                                                              |
 
 ---
 
