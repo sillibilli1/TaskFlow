@@ -597,23 +597,32 @@ async function api<T>(path: string, options: RequestInit = {}): Promise<T> {
   ) {
     headers["Idempotency-Key"] = newIdempotencyKey();
   }
-  const response = await fetch(`${API}${path}`, {
-    ...options,
-    credentials: "include",
-    headers,
-  });
-  const contentType = response.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
-  const body = isJson ? await response.json().catch(() => ({})) : {};
-  if (!response.ok) {
-    throw new Error(
-      body?.error?.message ??
-        (typeof body?.message === "string"
-          ? body.message
-          : `Request failed (${response.status})`),
-    );
+  // Add 10-second timeout to avoid indefinite hanging on slow cold starts or unreachable hosts
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`${API}${path}`, {
+      ...options,
+      signal: options.signal ?? controller.signal,
+      credentials: "include",
+      headers,
+    });
+    const contentType = response.headers.get("content-type");
+    const isJson = contentType && contentType.includes("application/json");
+    const body = isJson ? await response.json().catch(() => ({})) : {};
+    if (!response.ok) {
+      throw new Error(
+        body?.error?.message ??
+          (typeof body?.message === "string"
+            ? body.message
+            : `Request failed (${response.status})`),
+      );
+    }
+    return body as T;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  return body as T;
 }
 
 // ==========================================
