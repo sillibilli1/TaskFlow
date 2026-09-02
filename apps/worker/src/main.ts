@@ -70,7 +70,8 @@ export async function handleJob(raw: string, redis?: Redis) {
         );
         return;
       }
-      if (attempt < 2) await new Promise((res) => setTimeout(res, 2000 * attempt));
+      if (attempt < 2)
+        await new Promise((res) => setTimeout(res, 2000 * attempt));
     }
   }
 }
