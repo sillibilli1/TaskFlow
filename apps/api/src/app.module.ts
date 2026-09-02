@@ -13,6 +13,8 @@ import { RedisService } from "./redis.service";
 import { RoleGuard } from "./guards";
 import { WorkspaceController } from "./workspace.controller";
 import { WorkspaceService } from "./workspace.service";
+import { ProductController } from "./product.controller";
+import { ProductService } from "./product.service";
 
 @Controller()
 class AppController {
@@ -47,12 +49,18 @@ class AppController {
   }
 }
 @Module({
-  controllers: [AppController, AuthController, WorkspaceController],
+  controllers: [
+    AppController,
+    AuthController,
+    WorkspaceController,
+    ProductController,
+  ],
   providers: [
     DatabaseService,
     RedisService,
     AuthService,
     WorkspaceService,
+    ProductService,
     RoleGuard,
   ],
   exports: [AuthService, DatabaseService, RedisService],
