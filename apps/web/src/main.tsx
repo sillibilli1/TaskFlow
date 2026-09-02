@@ -575,9 +575,11 @@ function IconLayers({
 }
 
 // ==========================================
-// API Helper
-// ==========================================
-const API = "/api/v1";
+const API_BASE =
+  (
+    import.meta as unknown as { env?: { VITE_API_URL?: string } }
+  ).env?.VITE_API_URL?.replace(/\/+$/, "") ?? "";
+const API = `${API_BASE}/api/v1`;
 
 function newIdempotencyKey() {
   return crypto.randomUUID();

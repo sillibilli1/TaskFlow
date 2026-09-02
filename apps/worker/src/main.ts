@@ -94,7 +94,7 @@ async function processJobs(redis: Redis) {
 }
 
 if (process.env.WORKER_DISABLE_LISTEN !== "true") {
-  const port = Number(process.env.WORKER_PORT ?? 3001);
+  const port = Number(process.env.PORT ?? process.env.WORKER_PORT ?? 3001);
   createServer((_req, res) => {
     res.writeHead(200, { "content-type": "text/plain" });
     res.end("worker online\n");

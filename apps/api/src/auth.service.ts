@@ -15,10 +15,19 @@ import { QueueService } from "./queue.service";
 const hashToken = (value: string) =>
   createHash("sha256").update(value).digest("hex");
 const secret = () => process.env.SESSION_SECRET ?? "development-only-change-me";
+const cookieSameSite =
+  (process.env.COOKIE_SAMESITE as "lax" | "none" | "strict" | undefined) ??
+  (process.env.APP_ENV === "production" ? "none" : "lax");
+
+const cookieSecure =
+  process.env.COOKIE_SECURE !== undefined
+    ? process.env.COOKIE_SECURE === "true"
+    : process.env.APP_ENV === "production";
+
 const tokenCookie = {
   httpOnly: true,
-  sameSite: "lax" as const,
-  secure: process.env.APP_ENV === "production",
+  sameSite: cookieSameSite,
+  secure: cookieSecure,
   path: "/",
 };
 

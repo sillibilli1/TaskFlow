@@ -1,0 +1,20 @@
+aws_region         = "us-east-1"
+environment        = "production"
+vpc_cidr           = "10.0.0.0/16"
+availability_zones = ["us-east-1a", "us-east-1b"]
+
+# Database
+db_instance_class  = "db.t4g.small"
+db_name            = "taskflow"
+db_username        = "taskflow_admin"
+db_password        = "REPLACE_WITH_SECURE_PASSWORD"
+
+# Cache
+redis_node_type    = "cache.t4g.micro"
+
+# Compute Containers
+api_image          = "ghcr.io/sillibilli1/taskflow-api:latest"
+worker_image       = "ghcr.io/sillibilli1/taskflow-worker:latest"
+
+# Optional ACM TLS Certificate
+certificate_arn    = ""

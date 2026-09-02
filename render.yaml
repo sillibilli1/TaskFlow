@@ -1,0 +1,104 @@
+services:
+  # -------------------------------------------------------------
+  # TaskFlow API - Express / NestJS REST Backend
+  # -------------------------------------------------------------
+  - type: web
+    name: taskflow-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build --workspace=@cloud-saas/api
+    startCommand: node apps/api/dist/main.js
+    healthCheckPath: /api/v1/health
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: "true"
+      - key: REDIS_URL
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        sync: false
+      - key: COOKIE_SAMESITE
+        value: none
+      - key: COOKIE_SECURE
+        value: "true"
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_STORAGE_BUCKET
+        value: attachments
+      - key: SMTP_HOST
+        value: sandbox.smtp.mailtrap.io
+      - key: SMTP_PORT
+        value: "2525"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_SECURE
+        value: "false"
+      - key: EMAIL_FROM
+        value: TaskFlow <no-reply@taskflow.dev>
+      - key: RATE_LIMIT_MUTATION
+        value: "60"
+      - key: RATE_LIMIT_WINDOW_SEC
+        value: "60"
+
+  # -------------------------------------------------------------
+  # TaskFlow Worker - Redis Background Job & Notification Consumer
+  # Deployed as a Web Service on Free Tier (listens on HTTP port for health checks)
+  # -------------------------------------------------------------
+  - type: web
+    name: taskflow-worker
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build --workspace=@cloud-saas/worker
+    startCommand: node apps/worker/dist/main.js
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_ENV
+        value: production
+      - key: REDIS_URL
+        sync: false
+      - key: SMTP_HOST
+        value: sandbox.smtp.mailtrap.io
+      - key: SMTP_PORT
+        value: "2525"
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_SECURE
+        value: "false"
+      - key: EMAIL_FROM
+        value: TaskFlow <no-reply@taskflow.dev>
+
+  # -------------------------------------------------------------
+  # TaskFlow Web - React / Vite Single Page Application
+  # -------------------------------------------------------------
+  - type: static
+    name: taskflow-web
+    plan: free
+    buildCommand: npm install && npm run build --workspace=@cloud-saas/web
+    staticPublishPath: apps/web/dist
+    autoDeploy: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false
