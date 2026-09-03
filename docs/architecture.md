@@ -14,7 +14,7 @@ flowchart TB
 
     subgraph Render["Render Cloud Edge (Oregon)"]
         subgraph StaticTier["Static Hosting"]
-            WebSite["taskflow-web-n5jo.onrender.com<br/><b>React 18 + Vite SPA</b><br/>Global Edge CDN & Anycast"]
+            WebSite["taskflow-web-n5jb.onrender.com<br/><b>React 18 + Vite SPA</b><br/>Global Edge CDN & Anycast"]
         end
 
         subgraph ComputeTier["Container Compute (Free Web Services)"]
